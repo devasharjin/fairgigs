@@ -8,7 +8,8 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-  ], base: '/fairgigs/',
+  ],
+  base: '/',
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
