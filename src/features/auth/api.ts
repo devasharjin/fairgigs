@@ -9,6 +9,18 @@ import type {
 
 export async function loginUser(payload: LoginPayload) {
   const res = await apiPost<any, LoginPayload>("/api/auth/login", payload);
+  const token = res?.accessToken || res?.tokens?.accessToken;
+  const refreshToken = res?.refreshToken || res?.tokens?.refreshToken;
+  if (token) {
+    try {
+      localStorage.setItem("auth_token", token);
+    } catch {}
+  }
+  if (refreshToken) {
+    try {
+      localStorage.setItem("refresh_token", refreshToken);
+    } catch {}
+  }
   return { ...res, user: res?.user || res };
 }
 
@@ -20,8 +32,15 @@ export async function getMe(): Promise<MeResponse> {
   return res;
 }
 
-export function logout() {
-  return apiPost<any>("/api/auth/logout");
+export async function logout() {
+  try {
+    await apiPost<any>("/api/auth/logout");
+  } finally {
+    try {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("refresh_token");
+    } catch {}
+  }
 }
 
 export const customerRegister = async (payload: CustomerRegisterPayload) => {

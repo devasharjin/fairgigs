@@ -345,7 +345,7 @@ export const router = createBrowserRouter([
       // =========================
       {
         path: "*",
-        element: <DashboardRedirect />,
+        element: <Navigate to="/" replace />,
       },
     ],
   },

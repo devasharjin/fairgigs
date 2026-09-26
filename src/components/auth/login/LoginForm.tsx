@@ -99,10 +99,9 @@ export default function LoginForm() {
 
       // Redirect to the redirect query param if provided, otherwise default role dashboard
       const redirectUrl = searchParams.get("redirect");
-      const role = userToSet?.role;
       const targetPath = (redirectUrl && redirectUrl.startsWith("/"))
         ? redirectUrl
-        : getRoleDashboardPath(role);
+        : "/";
       navigate(targetPath, { replace: true });
     } catch (err: any) {
       const errorMsg =

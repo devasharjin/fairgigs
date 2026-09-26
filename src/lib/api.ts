@@ -6,8 +6,23 @@ import { useAuthStore } from "@/features/auth/store";
 const api = axios.create({
   baseURL: env.backendUrl,
   withCredentials: true,
-  timeout: 10000,
+  timeout: 15000,
 });
+
+api.interceptors.request.use(
+  (config) => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (token && !config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 api.interceptors.response.use(
   (response) => response,
@@ -24,14 +39,32 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await axios.post(
+        const refreshToken = localStorage.getItem("refresh_token");
+        const res: any = await axios.post(
           `${env.backendUrl}/api/auth/refresh-token`,
-          {},
+          { refreshToken },
           { withCredentials: true }
         );
 
+        const newAccessToken =
+          res.data?.data?.accessToken ||
+          res.data?.accessToken ||
+          res.data?.data?.tokens?.accessToken;
+
+        if (newAccessToken) {
+          try {
+            localStorage.setItem("auth_token", newAccessToken);
+          } catch {}
+          originalRequest.headers = originalRequest.headers || {};
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        }
+
         return api(originalRequest);
       } catch (err) {
+        try {
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("refresh_token");
+        } catch {}
         useAuthStore.getState().setUser(null);
         return Promise.reject(err);
       }

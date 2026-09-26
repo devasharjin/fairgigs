@@ -64,6 +64,7 @@ export interface AuthTokens {
 export interface LoginPayload {
   email: string;
   password: string;
+  username?: string;
 }
 
 /**

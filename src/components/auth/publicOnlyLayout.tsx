@@ -41,7 +41,9 @@ export const PublicOnlyLayout = () => {
       location.pathname === "/login" ||
       location.pathname.startsWith("/register")
     ) {
-      return <Navigate to={getRoleDashboardPath(user.role)} replace />;
+      const searchParams = new URLSearchParams(location.search);
+      const redirect = searchParams.get("redirect");
+      return <Navigate to={redirect && redirect.startsWith("/") ? redirect : "/"} replace />;
     }
   }
 

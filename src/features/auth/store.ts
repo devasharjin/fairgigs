@@ -40,13 +40,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
       error: message,
     }),
 
-  clearAuth: () =>
+  clearAuth: () => {
+    try {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("refresh_token");
+    } catch {}
     set({
       status: "ready",
       isBootstrapped: true,
       user: null,
       error: null,
-      
-    }
-  ),
+    });
+  },
 }));
