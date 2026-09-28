@@ -62,6 +62,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (err) {
         try {
+          localStorage.removeItem("fairgig_user");
           localStorage.removeItem("auth_token");
           localStorage.removeItem("refresh_token");
         } catch {}

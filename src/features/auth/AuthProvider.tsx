@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useBootstrapAuth } from "./useBootstrapAuth";
 import { SocketNotificationProvider } from "@/features/socket/SocketNotificationProvider";
 import { useAuthStore } from "./store";
@@ -6,10 +6,19 @@ import { Loader2, ShieldCheck } from "lucide-react";
 
 const AuthProvider = () => {
   const isBootstrapped = useAuthStore((s) => s.isBootstrapped);
+  const user = useAuthStore((s) => s.user);
+  const location = useLocation();
   useBootstrapAuth();
 
-  // Ensure homepage and app routes are ONLY loaded after authentication completes
-  if (!isBootstrapped) {
+  // Public customer routes (homepage, services, contact) can display immediately!
+  // Only deep protected routes need to wait if not yet bootstrapped
+  const isPublicRoute =
+    location.pathname === "/" ||
+    location.pathname === "/services" ||
+    location.pathname === "/categories" ||
+    location.pathname === "/contact";
+
+  if (!isBootstrapped && !user && !isPublicRoute) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background text-foreground transition-colors">
         <div className="flex flex-col items-center gap-5 p-8 text-center max-w-sm animate-in fade-in duration-300">
@@ -26,7 +35,7 @@ const AuthProvider = () => {
               FairGig
             </h2>
             <p className="text-xs text-muted-foreground animate-pulse font-medium">
-              Signing in automatically and loading homepage...
+              Loading...
             </p>
           </div>
         </div>

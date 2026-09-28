@@ -37,6 +37,7 @@ export async function logout() {
     await apiPost<any>("/api/auth/logout");
   } finally {
     try {
+      localStorage.removeItem("fairgig_user");
       localStorage.removeItem("auth_token");
       localStorage.removeItem("refresh_token");
     } catch {}
