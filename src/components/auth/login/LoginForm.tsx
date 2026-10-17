@@ -36,9 +36,9 @@ export default function LoginForm() {
   const [searchParams] = useSearchParams();
   const setUser = useAuthStore((state) => state.setUser);
 
-  // Form fields
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Default pre-filled credentials for fast instant login
+  const [email, setEmail] = useState("devasharjin@gmail.com");
+  const [password, setPassword] = useState("deva.420");
 
   // UI states
   const [showPassword, setShowPassword] = useState(false);
@@ -54,6 +54,32 @@ export default function LoginForm() {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isEmailValid = emailRegex.test(email.trim());
   const isPasswordValid = password.length > 0;
+
+  const handleQuickLogin = async () => {
+    setIsLoading(true);
+    try {
+      const res = await loginUser({
+        email: "devasharjin@gmail.com",
+        password: "deva.420",
+      });
+
+      toast.success("Welcome back! Fast login successful.");
+
+      const userToSet = res?.user || (res as any)?.data?.user || res;
+      if (userToSet) {
+        setUser(userToSet);
+      }
+
+      const redirectUrl = searchParams.get("redirect");
+      const targetPath =
+        redirectUrl && redirectUrl.startsWith("/") ? redirectUrl : "/";
+      navigate(targetPath, { replace: true });
+    } catch (err: any) {
+      toast.error(err?.message || "Fast login failed. Please retry.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -222,11 +248,23 @@ export default function LoginForm() {
               )}
             </div>
 
+            {/* 1-Click Fast Auto-Login Button */}
+            <Button
+              type="button"
+              onClick={handleQuickLogin}
+              disabled={isLoading}
+              className="w-full h-10 rounded-lg text-sm font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm transition-all cursor-pointer gap-2"
+            >
+              <Sparkles className="size-4 animate-pulse text-amber-200" />
+              <span>⚡ 1-Click Instant Auto-Login</span>
+            </Button>
+
             {/* Submit Button */}
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-10 rounded-lg text-sm font-semibold shadow-xs hover:bg-primary/90 transition-all cursor-pointer mt-2"
+              variant="outline"
+              className="w-full h-10 rounded-lg text-sm font-semibold shadow-xs hover:bg-muted/80 transition-all cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -235,7 +273,7 @@ export default function LoginForm() {
                 </>
               ) : (
                 <>
-                  Sign In
+                  Sign In with Credentials
                   <ArrowRight className="size-4 ml-1.5" />
                 </>
               )}

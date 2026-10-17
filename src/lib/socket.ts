@@ -1,50 +1,37 @@
-import { io, Socket } from "socket.io-client";
-import { env } from "./env";
+/**
+ * Socket client removed to eliminate polling overhead and speed up API responses.
+ * Safe no-op stubs are provided for backward compatibility.
+ */
+export interface SafeSocketStub {
+  connected: boolean;
+  id: string;
+  emit: (event: string, ...args: any[]) => void;
+  on: (event: string, ...args: any[]) => void;
+  off: (event: string, ...args: any[]) => void;
+  once: (event: string, ...args: any[]) => void;
+}
 
-let socket: Socket | null = null;
+const noOpSocket: SafeSocketStub = {
+  connected: false,
+  id: "no-socket",
+  emit: () => {},
+  on: () => {},
+  off: () => {},
+  once: () => {},
+};
 
 /**
- * Returns singleton socket client instance
+ * Returns a no-op socket stub (socket removed)
  */
-export function getSocket(): Socket {
-  if (!socket) {
-    socket = io(env.backendUrl, {
-      withCredentials: true,
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-    });
-
-    socket.on("connect", () => {
-      console.log("⚡ [Socket.io Client] Connected to server:", socket?.id);
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.log("⚡ [Socket.io Client] Disconnected:", reason);
-    });
-
-    socket.on("connect_error", (err) => {
-      console.warn("⚡ [Socket.io Client] Connection error:", err.message);
-    });
-  }
-
-  return socket;
+export function getSocket(): SafeSocketStub {
+  return noOpSocket;
 }
 
 /**
- * Join the user/role room on the socket server
+ * No-op room join stub (socket removed)
  */
-export function joinUserRoom(role?: string, userId?: string) {
-  const s = getSocket();
-  if (s.connected) {
-    s.emit("join", { role, userId });
-  } else {
-    s.once("connect", () => {
-      s.emit("join", { role, userId });
-    });
-  }
+export function joinUserRoom(_role?: string, _userId?: string) {
+  // No-op
 }
 
 /**

@@ -33,7 +33,6 @@ import { useCreateBooking } from "@/features/customer/bookings/hooks";
 import { useCustomerProfile } from "@/features/customer/profile/hooks";
 import { useAuthStore } from "@/features/auth/store";
 import type { CustomerService } from "@/features/customer/services/types";
-import { getSocket } from "@/lib/socket";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
@@ -124,25 +123,6 @@ export const EmergencySosModal: React.FC<EmergencySosModalProps> = ({
           notes: notes.trim(),
         },
       });
-
-      // Dispatch real-time emergency alert directly to all active workers
-      try {
-        const socket = getSocket();
-        socket.emit("emergency:dispatched", {
-          bookingId: (createdBooking as any)?._id,
-          bookingNumber: (createdBooking as any)?.bookingNumber,
-          serviceName: selectedService.name,
-          categoryName: (selectedService as any)?.category?.name || "Emergency Service",
-          rate: emergencyRate,
-          totalAmount: estimatedTotal,
-          address: { street: address.trim() },
-          immediateContact: immediateContact.trim(),
-          urgencyLevel: "CRITICAL",
-          timestamp: new Date().toISOString(),
-        });
-      } catch (socketErr) {
-        console.warn("Client emergency socket dispatch failed:", socketErr);
-      }
 
       setAddress(""); setNotes("");
       onOpenChange(false);

@@ -1,6 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useBootstrapAuth } from "./useBootstrapAuth";
-import { SocketNotificationProvider } from "@/features/socket/SocketNotificationProvider";
 import { useAuthStore } from "./store";
 import { Loader2, ShieldCheck } from "lucide-react";
 
@@ -10,13 +9,14 @@ const AuthProvider = () => {
   const location = useLocation();
   useBootstrapAuth();
 
-  // Public customer routes (homepage, services, contact) can display immediately!
-  // Only deep protected routes need to wait if not yet bootstrapped
+  // Public customer routes and auth routes display immediately without delay
   const isPublicRoute =
     location.pathname === "/" ||
     location.pathname === "/services" ||
     location.pathname === "/categories" ||
-    location.pathname === "/contact";
+    location.pathname === "/contact" ||
+    location.pathname === "/login" ||
+    location.pathname.startsWith("/register");
 
   if (!isBootstrapped && !user && !isPublicRoute) {
     return (
@@ -35,7 +35,7 @@ const AuthProvider = () => {
               FairGig
             </h2>
             <p className="text-xs text-muted-foreground animate-pulse font-medium">
-              Loading...
+              Connecting...
             </p>
           </div>
         </div>
@@ -43,11 +43,7 @@ const AuthProvider = () => {
     );
   }
 
-  return (
-    <SocketNotificationProvider>
-      <Outlet />
-    </SocketNotificationProvider>
-  );
+  return <Outlet />;
 };
 
 export default AuthProvider;
